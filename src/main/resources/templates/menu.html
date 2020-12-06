@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+<title>メニュー</title>
+<meta charset="UTF-8" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+</head>
+<body>
+  <div id="base">
+    <div th:replace="fragment/header"></div>
+
+    <div id="contents">
+      <div id="view-title">メニュー</div>
+
+
+      <!--       <ul class="msgs"> -->
+      <!--         <li>エラーメッセージ表示エリア</li> -->
+      <!--       </ul> -->
+
+
+      <p id="contents-title">機能を選択してください。</p>
+      <ul id="menu">
+        <li class="menu-list">
+          <input type="button" value="施設予約" th:attr="onClick='location.href=\'' + @{/facility/} + '\''" />
+        </li>
+        <th:block sec:authorize="hasAuthority('ADMIN')">
+          <li class="menu-list">
+            <input type="button" value="施設情報管理" th:attr="onClick='location.href=\'' + @{/admin/facility/} + '\''" />
+          </li>
+          <li class="menu-list">
+            <input type="button" value="ユーザー情報管理" th:attr="onClick='location.href=\'' + @{/admin/user} + '\''" />
+          </li>
+          <li class="menu-list">
+            <input type="button" value="データ初期化" th:attr="onClick='location.href=\'' + @{/admin/init} + '\''" />
+          </li>
+        </th:block>
+      </ul>
+    </div>
+
+    <div th:replace="fragment/footer"></div>
+  </div>
+</body>
+</html>

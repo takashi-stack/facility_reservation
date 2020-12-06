@@ -1,0 +1,256 @@
+@CHARSET "UTF-8";
+
+body {
+
+}
+
+#base {
+  width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+#header {
+  background-color: #0000ff;
+  color: white;
+  height: 170px;
+}
+
+#header h1 {
+  padding-top: 15px;
+}
+
+ul#header-bolock {
+  text-align: right;
+}
+
+ul#header-bolock li {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+#contents {
+  margin-top: 40px;
+}
+
+#contents p#login-title {
+  margin-top: 60p;
+  margin-bottom: 30p;
+}
+
+ul.msgs {
+  list-style: none;
+}
+
+ul.msgs li {
+  color: red;
+}
+
+input {
+  margin-top: 30px;
+}
+
+input[type="text"] {
+  outline: none;
+  width: 100%;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+input[type="password"] {
+  outline: none;
+  width: 100%;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+textarea#facility-info-remarks {
+  outline: none;
+  width: 100%;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+table#login {
+  text-align: center;
+  width: 350px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+table#login.error {
+  margin-right: 0;
+}
+
+table#login th {
+  width: 150px;
+  min-width: 150px;
+}
+
+table#login th, td {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+table#login td.error {
+  white-space: nowrap;
+}
+
+#login input {
+  width: 200px;
+  min-width: 200px
+}
+
+#login input, #login-button input {
+  margin-top: 0px;
+}
+
+table#calender {
+  text-align: center;
+  width: 910px;
+  margin-left: auto;
+  margin-right: auto;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+table#calender th.calender-th {
+  width: 130px;
+  background-color: #4040ff;
+  color: white;
+}
+
+table#calender, table#calender td, th.calender-th {
+  border: 1px #000000 solid;
+}
+
+table#facility {
+  text-align: center;
+  width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+table#facility, table#facility td, th.facility-th {
+  border: 1px #000000 solid;
+}
+
+table#facility th.facility-th {
+  background-color: #4040ff;
+  color: white;
+}
+
+table#facility th.facility-index {
+  width: 70px;
+}
+
+table#facility-info {
+  text-align: center;
+  width: 450px;
+  margin-left: auto;
+  margin-right: auto;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+table#facility-info th.facility-info-th {
+  background-color: #4040ff;
+  color: white;
+  width: 150px;
+}
+
+table#facility-info, table#facility-info td, th.facility-info-th {
+  border: 1px #000000 solid;
+}
+
+table#user-info {
+  text-align: center;
+  width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+table#user-info th.user-info-th {
+  background-color: #4040ff;
+  color: white;
+  width: 150px;
+}
+
+table#user-info, table#user-info td, th.user-info-th {
+  border: 1px #000000 solid;
+}
+
+table#user-info th.user-info-index {
+  width: 70px;
+}
+
+ul#menu {
+  list-style: none;
+  padding-left: 0;
+}
+
+ul#menu li.menu-list {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  width: 250px;
+}
+
+ul#menu li.menu-list input {
+  text-align: left;
+  width: 200px;
+  height: 50px;
+  padding-left: 30px;
+}
+
+ul#facility {
+  list-style: none;
+  padding-left: 0;
+}
+
+ul#facility li.facility-list {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  width: 250px;
+}
+
+ul#facility li.facility-list input {
+  text-align: center;
+  width: 200px;
+  height: 50px;
+}
+
+ul.calender-cell-ui {
+  list-style: none;
+  padding-left: 0;
+  font-size: 14px;
+}
+
+ul.calender-cell-li {
+
+}
+
+table#reservation-check {
+  width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#return-display {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}

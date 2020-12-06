@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+<title>予約状況</title>
+<meta charset="UTF-8" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+</head>
+<body>
+  <div id="base">
+    <div th:replace="fragment/header"></div>
+
+    <div id="contents">
+      <div id="view-title">予約状況詳細</div>
+
+      <p id="contents-title" th:text="${facility.name}">会議室001</p>
+      <div id="calender-menu">
+        <span th:text="${y} + '年' + ${m} + '月'">2017年10月</span>
+        <input type="button" value="次月"
+          th:attr="onclick='location.href=\'' + @{/reservation/{id}(id=${facility.id},y=${next_y},m=${next_m})} + '\''" />
+      </div>
+      <table id="calender">
+        <tr>
+          <th class="calender-th">月</th>
+          <th class="calender-th">火</th>
+          <th class="calender-th">水</th>
+          <th class="calender-th">木</th>
+          <th class="calender-th">金</th>
+          <th class="holiday calender-th">土</th>
+          <th class="holiday calender-th">日</th>
+        </tr>
+
+        <tr th:each="row, rowStat : ${calender}">
+          <td th:each="cell, cellStat : ${row}" th:object="${cell}">
+            <ul class="calender-cell-ui">
+              <li class="calender-cell-li" th:text="${cell != null}? *{day} : '-'">1</li>
+
+              <th:block th:if="${cell != null}">
+                <li class="calender-cell-li" th:each="reserve : ${cell.reserves}" th:object="${reserve}">
+                  <div th:inline="text">[[*{#temporals.format(startTime, 'HH:mm')}]]～[[*{#temporals.format(endTime,'HH:mm')}]]</div>
+                  <div th:text="'(' + *{user.id} + ')'">(銀河太郎)</div>
+                </li>
+                <li class="calender-cell-li">
+                  <input type="image" th:src="@{/img/add.png}" alt="新規予約" title="新規予約"
+                    th:attr="onclick='location.href=\'' + @{/reservation/{id}/add(id=${facility.id},y=${y},m=${m},d=${cell.day})} + '\''" />
+                </li>
+              </th:block>
+            </ul>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div id="return-display">
+      <a th:href="@{/facility/}">前のページに戻る</a>
+    </div>
+
+    <div th:replace="fragment/footer"></div>
+  </div>
+</body>
+</html>

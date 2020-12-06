@@ -1,0 +1,51 @@
+@CHARSET "UTF-8";
+
+body{
+}
+
+#base{
+	width: 960px;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+
+}
+
+#header{
+	background-color: #0000ff;
+	color: white;
+	height: 150px;
+
+}
+
+#header h1{
+	padding-top:20px;
+}
+
+ul#header-bolock{
+	text-align: right;
+}
+ul#header-bolock li{
+	display: inline-block;
+	margin-right: 15px;
+}
+
+#contents{
+	margin-top: 40px;
+
+}
+
+#contents p#login-title{
+	margin-top: 60p;
+	margin-bottom: 30p;
+}
+
+
+ul.msgs{
+	list-style:none;
+}
+
+ul.msgs li{
+	color: red;
+
+}

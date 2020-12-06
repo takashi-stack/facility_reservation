@@ -1,0 +1,27 @@
+@CHARSET "UTF-8";
+
+table {
+  margin: 0.5em;
+  border-collapse: collapse;
+}
+
+td {
+  text-align: center;
+  width: 150px;
+  width: auto;
+  height: auto;
+  min-width: 150px;
+  min-height: 100px;
+  height: 100px;
+}
+
+ul {
+  margin: 0px;
+  padding-left: 30px;
+  padding-right: 10px;
+  font-size: 15px;
+}
+
+.glayout{
+  background-color: #BDBDBD;
+}

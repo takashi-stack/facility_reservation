@@ -1,0 +1,29 @@
+@CHARSET "UTF-8";
+
+input{
+	margin-top: 30px;
+}
+input[type="text"]{
+	outline: none;
+	width: 100%;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+input[type="password"]{
+	outline: none;
+	width: 100%;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+textarea#facility-info-remarks {
+	outline: none;
+	width: 100%;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+	overflow:hidden;
+}

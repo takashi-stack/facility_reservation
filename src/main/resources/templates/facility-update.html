@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+<title>施設情報更新・削除</title>
+<meta charset="UTF-8" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+</head>
+<body>
+  <div id="base">
+    <div th:replace="fragment/header"></div>
+
+    <div id="contents" th:object="${facilityForm}">
+      <div id="view-title">施設情報管理</div>
+
+      <ul class="msgs">
+        <li th:text="${error}" th:if="${error != null}">エラーメッセージ表示エリア</li>
+      </ul>
+
+      <p id="contents-title">施設情報の更新、削除を行えます</p>
+
+      <form th:action="@{'/admin/facility/update/' + *{id}}" method="post">
+        <table id="facility-info">
+          <tr>
+            <th class="facility-info-th">施設名</th>
+            <td><input id="facility-info-name" type="text" maxlength="10" th:field="*{name}" required="required" />
+            <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" style="color: red;"></div></td>
+          </tr>
+          <tr>
+            <th class="facility-info-th">種別</th>
+            <td>
+              <div th:each="facilityType,stat : ${types}">
+                <input type="radio" th:value="${facilityType.id}"
+                  th:checked="${(stat.first and facilityForm == null) or (facilityType.id == facilityForm.typeId)}"
+                  th:field="*{typeId}" />
+                <label th:text="${facilityType.name}">会議室</label>
+              </div>
+              <div th:if="${#fields.hasErrors('typeId')}" th:errors="*{typeId}" style="color: red;"></div>
+            </td>
+          </tr>
+          <tr>
+            <th class="facility-info-th">定員</th>
+            <td><input id="facility-info-capacity" type="number" th:field="*{capacity}" required="required" />
+            <div th:if="${#fields.hasErrors('capacity')}" th:errors="*{capacity}" style="color: red;"></div></td>
+          </tr>
+        </table>
+
+        <input type="submit" name="update_confirm" value="更新" />
+        <input type="submit" name="delete_confirm" value="削除" />
+      </form>
+    </div>
+
+    <div th:replace="fragment/footer"></div>
+  </div>
+</body>
+</html>

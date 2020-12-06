@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+<title>ユーザ情報削除確認</title>
+<meta charset="UTF-8" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+</head>
+<body>
+  <div id="base">
+    <div th:replace="fragment/header"></div>
+
+    <div id="contents" th:object="${userInfoForm}">
+      <div id="view-title">ユーザ情報削除確認</div>
+
+      <p id="contents-title">以下の内容を削除します。よろしいですか？</p>
+      <form th:action="@{'/admin/user/delete/' + *{id}}" method="post">
+
+        <table id="reservation-check" border="1">
+          <tr>
+            <th>ユーザー名</th>
+            <td th:text="*{username}"></td>
+          </tr>
+          <tr>
+            <th>パスワード</th>
+            <td th:text="*{password}"></td>
+          </tr>
+          <tr>
+            <th>権限</th>
+            <td th:text="*{permissionText}"></td>
+          </tr>
+          <tr>
+            <th>備考</th>
+            <td th:text="*{note}"></td>
+          </tr>
+        </table>
+
+        <p>
+          <input type="submit" name="redo" value="戻る" />
+          <input type="submit" name="complete" value="確定" />
+        </p>
+      </form>
+    </div>
+
+    <div th:replace="fragment/footer"></div>
+  </div>
+</body>
+</html>

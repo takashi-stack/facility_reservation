@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+<title>予約内容確認</title>
+<meta charset="UTF-8" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+</head>
+<body>
+  <div id="base">
+    <div th:replace="fragment/header"></div>
+
+    <div id="contents" th:object="${reservationForm}">
+      <div id="view-title">予約内容確認</div>
+      <p id="contents-title">以下の内容で予約します。よろしいですか？</p>
+      <form th:action="@{/reservation/{facilityId}/add(facilityId=${facility.id})}" method="post">
+        <table id="reservation-check" border="1">
+          <tr>
+            <th>予約施設</th>
+            <td th:text="${facility.name}">会議室001</td>
+          </tr>
+          <tr>
+            <th>予約日</th>
+            <td th:text="*{y + '年' +m + '月' + d + '日'}">2017年10月1日</td>
+          </tr>
+          <tr>
+            <th>予約時間</th>
+            <td th:inline="text">[[*{startHour}]]:[[*{startMin}]]~[[*{endHour}]]:[[*{endMin}]]</td>
+          </tr>
+        </table>
+
+        <p>
+          <input type="submit" name="redo" value="戻る" />
+          <input type="submit" name="complete" value="確定" />
+        </p>
+      </form>
+    </div>
+
+    <div th:replace="fragment/footer"></div>
+  </div>
+</body>
+</html>

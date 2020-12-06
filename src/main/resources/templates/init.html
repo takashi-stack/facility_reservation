@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+<title>初期化</title>
+<meta charset="UTF-8" />
+<link rel="stylesheet" type="text/css" th:href="@{/css/style.css}" />
+</head>
+<body>
+  <div id="base">
+    <div th:replace="fragment/header"></div>
+
+    <div id="contents">
+      <div id="view-title">初期化</div>
+
+      <ul class="msgs">
+        <li th:text="${error}" th:if="${error} != null">エラーメッセージ表示エリア</li>
+      </ul>
+
+      <p id="contents-title">テストデータの初期化を行います。</p>
+
+      <form th:action="@{/admin/init}" method="post">
+        <input type="submit" value="初期化処理" />
+      </form>
+    </div>
+
+    <div th:replace="fragment/footer"></div>
+  </div>
+</body>
+</html>

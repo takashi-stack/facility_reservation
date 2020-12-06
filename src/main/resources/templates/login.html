@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+<title>ログイン</title>
+<meta charset="UTF-8" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+</head>
+<body>
+  <div id="base">
+    <div id="header">
+      <h1>TokyoNorthCity&nbsp;&nbsp;施設予約システム</h1>
+    </div>
+    <div id="contents">
+      <div id="view-title">ログイン</div>
+
+      <p id="login-title">ユーザ名とパスワードを入力してください</p>
+      <ul class="msgs">
+        <li th:text="${error}" th:if="${error != null}" />
+      </ul>
+
+      <form th:action="@{/login}" method="post" name="login">
+        <table id="login" th:classappend="${errorUsername != null} or ${errorPassword != null} ? 'error':''">
+          <tbody>
+            <tr>
+              <th>ユーザ名</th>
+              <td><input type="text" name="username" minlength="4" maxlength="10" required="required" autofocus="autofocus" /></td>
+              <td class="error" th:if="${errorUsername != null}">
+                <th:block th:each="str, stat : ${errorUsername}">
+                  <span th:text="${str}" style="color: red;"></span>
+                  <br th:if="!${stat.last}"/>
+                </th:block>
+              </td>
+            </tr>
+            <tr>
+              <th>パスワード</th>
+              <td><input type="password" name="password" minlength="6" maxlength="20" required="required" /></td>
+              <td class="error" th:if="${errorPassword != null}">
+                <th:block th:each="str, stat : ${errorPassword}">
+                  <span th:text="${str}" style="color: red;"></span>
+                  <br th:if="!${stat.last}"/>
+                </th:block>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p id="login-button">
+          <input type="submit" value="ログイン" />
+          <input type="reset" value="クリア" />
+        </p>
+      </form>
+    </div>
+
+    <div th:replace="fragment/footer"></div>
+  </div>
+</body>
+</html>

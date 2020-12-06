@@ -1,0 +1,45 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+<title>施設予約</title>
+<meta charset="UTF-8" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+</head>
+<body>
+  <div id="base">
+    <div th:replace="fragment/header"></div>
+
+    <div id="contents">
+      <div id="view-title">施設情報管理</div>
+
+      <!--
+            <ul class="msgs">
+                <li>エラーメッセージ表示エリア</li>
+            </ul>
+             -->
+      <p id="contents-title">施設一覧</p>
+
+      <input type="button" value="新規登録" th:attr="onClick='location.href=\'' + @{/admin/facility/add} + '\''" />
+      <table id="facility">
+        <tr>
+          <th class="facility-th facility-index">NO</th>
+          <th class="facility-th">施設名</th>
+          <th class="facility-th">種別</th>
+          <th class="facility-th">定員</th>
+        </tr>
+        <tr th:each="facility, stat : ${facilities}" th:object="${facility}">
+          <td th:text="${stat.count}"></td>
+          <td><a th:href="@{'/admin/facility/update/' + *{id}}" th:text="*{name}"></a></td>
+          <td th:text="*{type.name}"></td>
+          <td th:text="*{capacity}"></td>
+        </tr>
+      </table>
+
+    </div>
+
+    <div th:replace="fragment/footer"></div>
+  </div>
+</body>
+</html>

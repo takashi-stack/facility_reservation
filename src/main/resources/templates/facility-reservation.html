@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+<title>施設予約</title>
+<meta charset="UTF-8" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+</head>
+<body>
+  <div id="base" th:object="${reservationForm}">
+    <div th:replace="fragment/header"></div>
+
+    <div id="contents">
+      <div id="view-title">施設予約</div>
+
+      <p id="contents-title">予約時間を選択してください。</p>
+      <form th:action="@{/reservation/{facilityId}/add(facilityId=${facility.id})}" method="post">
+
+        <p th:text="${facility.name}">会議室001</p>
+        <p th:text="*{y + '年' + m + '月' + d + '日'}">2017年10月1日</p>
+        <p>
+          <label>予約開始時間 </label>
+          <select class="selectObj" th:field="*{startHour}">
+            <option th:each="num,stat : ${#numbers.sequence(9,21)}" th:value="${num}" th:text="${num}"
+              th:selected="${stat.first}" />
+          </select>
+          <label>時</label>
+          <select class="selectObj" th:field="*{startMin}">
+            <option value="00" selected="selected">00</option>
+            <option value="15">15</option>
+            <option value="30">30</option>
+            <option value="45">45</option>
+          </select>
+          <label>分</label>
+        </p>
+        <p>
+          <label>予約終了時間</label>
+          <select class="selectObj" th:field="*{endHour}">
+            <option th:each="num,stat : ${#numbers.sequence(9,21)}" th:value="${num}" th:text="${num}"
+              th:selected="${stat.first}" />
+          </select>
+          <label>時</label>
+          <select class="selectObj" th:field="*{endMin}">
+            <option value="00" selected="selected">00</option>
+            <option value="15">15</option>
+            <option value="30">30</option>
+            <option value="45">45</option>
+          </select>
+          <label>分</label>
+        </p>
+
+        <ul class="msgs">
+          <li th:text="${message}" th:if="${message} != null">エラーメッセージ表示エリア</li>
+        </ul>
+
+        <input type="submit" name="confirm" value="予約" />
+      </form>
+    </div>
+
+    <div id="return-display">
+      <a th:href="@{/reservation/{facilityId}(facilityId=${facility.id},y=*{y},m=*{m})}">前のページに戻る</a>
+    </div>
+
+    <div th:replace="fragment/footer"></div>
+  </div>
+</body>
+</html>

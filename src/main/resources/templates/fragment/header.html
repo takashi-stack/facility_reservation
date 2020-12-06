@@ -1,0 +1,15 @@
+<div th:fragment="common_header()" id="header">
+  <h1>TokyoNorthCity&nbsp;&nbsp;施設予約管理システム</h1>
+  <ul id="header-bolock">
+    <li>
+      <p>
+        <span sec:authentication="name"></span>さん&nbsp;こんにちは
+      </p>
+    </li>
+    <li>
+      <form th:action="@{/logout}" method="post">
+        <input type="submit" value="ログアウト" />
+      </form>
+    </li>
+  </ul>
+</div>

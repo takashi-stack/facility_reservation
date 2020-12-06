@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+<title>ユーザー情報更新・削除</title>
+<meta charset="UTF-8" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+</head>
+<body>
+  <div id="base">
+    <div th:replace="fragment/header"></div>
+
+    <div id="contents" th:object="${userInfoForm}">
+      <div id="view-title">ユーザー情報管理</div>
+
+      <ul class="msgs">
+        <li th:text="${error}" th:if="${error} != null"></li>
+      </ul>
+
+      <p id="contents-title">ユーザー情報の更新、削除をを行えます</p>
+
+      <form th:action="@{'/admin/user/update/' + *{id}}" method="post">
+        <table id="facility-info">
+          <tr>
+            <th class="facility-info-th">ユーザー名</th>
+            <td><input type="text" minlength="4" maxlength="10" th:field="*{username}" required="required" />
+                <div th:if="${#fields.hasErrors('username')}" th:errors="*{username}" style="color: red;"></div>
+            </td>
+          </tr>
+          <tr>
+            <th class="facility-info-th">パスワード</th>
+            <td><input type="text" minlength="6" maxlength="20" th:field="*{password}" required="required" />
+            <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" style="color: red;"></div></td>
+          </tr>
+          <tr>
+            <th class="facility-info-th">権限</th>
+            <td>
+              <div>
+                <input type="radio" name="user-authority" value="1" th:checked="*{permission == 1}"
+                  th:field="*{permission}" />
+                <label>管理者</label>
+              </div>
+              <div>
+                <input type="radio" name="user-authority" value="2" th:checked="*{permission == 2}"
+                  th:field="*{permission}" />
+                <label>ユーザー</label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <th class="facility-info-th">備考</th>
+            <td><textarea id="facility-info-remarks" rows="10" maxlength="200" th:field="*{note}"></textarea></td>
+          </tr>
+        </table>
+
+        <input type="submit" name="update_confirm" value="更新" />
+        <input type="submit" name="delete_confirm" value="削除" />
+      </form>
+
+
+    </div>
+
+    <div th:replace="fragment/footer"></div>
+  </div>
+</body>
+</html>
