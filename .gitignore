@@ -157,3 +157,7 @@ $RECYCLE.BIN/
 database/
 package.sh
 logs/*
+
+#追加
+src/main/resources/application-prod.properties
+
