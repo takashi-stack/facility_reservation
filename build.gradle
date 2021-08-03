@@ -33,3 +33,12 @@ dependencies {
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('org.springframework.security:spring-security-test')
 }
+
+jar {
+    baseName = 'demo'
+    version = '1.0.0-SNAPSHOT'
+}
+
+bootJar {
+    launchScript()
+}
