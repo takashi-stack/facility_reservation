@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>FacilityReservationAddControllerTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">java (2021/09/04 14:42:56)</a> &gt; <a href="../../index.html" class="el_group">facility_reservation</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">com.example.facilityreservation.web</a> &gt; <span class="el_source">FacilityReservationAddControllerTest.java</span></div><h1>FacilityReservationAddControllerTest.java</h1><pre class="source lang-java linenums">package com.example.facilityreservation.web;
+
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+
+import com.example.facilityreservation.domain.entity.FacilityEntity;
+import com.example.facilityreservation.domain.entity.ReservationEntity;
+import com.example.facilityreservation.exception.BusinessException;
+import com.example.facilityreservation.service.FacilityService;
+import com.example.facilityreservation.service.ReservationService;
+import com.example.facilityreservation.utility.MockFacility;
+import com.example.facilityreservation.utility.WithMockCustomUser;
+import com.example.facilityreservation.web.form.ReservationForm;
+
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@TestPropertySource(locations = &quot;/application-test.properties&quot;)
+<span class="fc" id="L44">public class FacilityReservationAddControllerTest {</span>
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private FacilityService facilityService;
+
+    @MockBean
+    private ReservationService reservationService;
+
+<span class="fc" id="L55">    private String root = &quot;/reservation&quot;;</span>
+    
+<span class="fc" id="L57">    private FacilityEntity mockValue = MockFacility.genFacilityEntity();</span>
+
+    @BeforeEach
+    void setup() {
+<span class="fc" id="L61">        clearInvocations(facilityService);</span>
+<span class="fc" id="L62">        clearInvocations(reservationService);</span>
+<span class="fc" id="L63">    }</span>
+
+    /**
+     * index
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void indexTest() throws Exception {
+<span class="fc" id="L72">        when(facilityService.findById(7)).thenReturn(mockValue);</span>
+<span class="fc" id="L73">        mockMvc.perform(</span>
+<span class="fc" id="L74">                get(root + &quot;/7/add&quot;)</span>
+<span class="fc" id="L75">                .param(&quot;y&quot;, &quot;2021&quot;)   </span>
+<span class="fc" id="L76">                .param(&quot;m&quot;, &quot;1&quot;)   </span>
+<span class="fc" id="L77">                .param(&quot;d&quot;, &quot;1&quot;)   </span>
+                )
+            //.andDo(print())
+<span class="fc" id="L80">            .andExpect(status().isOk())</span>
+<span class="fc" id="L81">            .andExpect(view().name(&quot;facility-reservation&quot;))</span>
+<span class="fc" id="L82">            .andExpect(model().attributeExists(&quot;reservationForm&quot;))</span>
+<span class="fc" id="L83">            .andExpect(model().attribute(&quot;facility&quot;, mockValue));</span>
+<span class="fc" id="L84">        verify(facilityService, times(1)).findById(7);</span>
+<span class="fc" id="L85">    }</span>
+
+    /**
+     * redo
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void redoTest() throws Exception {
+<span class="fc" id="L94">        when(facilityService.findById(8)).thenReturn(mockValue);</span>
+<span class="fc" id="L95">        ReservationForm form = genForm();</span>
+
+<span class="fc" id="L97">        mockMvc.perform(</span>
+<span class="fc" id="L98">                post(root + &quot;/8/add?redo&quot;)</span>
+<span class="fc" id="L99">                .flashAttr(&quot;reservationForm&quot;, form)  </span>
+<span class="fc" id="L100">                .with(SecurityMockMvcRequestPostProcessors.csrf()))</span>
+            //.andDo(print())
+<span class="fc" id="L102">            .andExpect(status().isOk())</span>
+<span class="fc" id="L103">            .andExpect(view().name(&quot;facility-reservation&quot;))</span>
+<span class="fc" id="L104">            .andExpect(model().attributeExists(&quot;reservationForm&quot;))</span>
+<span class="fc" id="L105">            .andExpect(model().attribute(&quot;facility&quot;, mockValue));</span>
+<span class="fc" id="L106">        verify(facilityService, times(1)).findById(8);</span>
+<span class="fc" id="L107">    }</span>
+    
+    /**
+     * confirm
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void confirmTest() throws Exception {
+<span class="fc" id="L116">        when(facilityService.findById(9)).thenReturn(mockValue);</span>
+<span class="fc" id="L117">        ReservationForm form = genForm();</span>
+
+<span class="fc" id="L119">        mockMvc.perform(</span>
+<span class="fc" id="L120">                post(root + &quot;/9/add?confirm&quot;)</span>
+<span class="fc" id="L121">                .flashAttr(&quot;reservationForm&quot;, form)  </span>
+<span class="fc" id="L122">                .with(SecurityMockMvcRequestPostProcessors.csrf()))</span>
+            //.andDo(print())
+<span class="fc" id="L124">            .andExpect(status().isOk())</span>
+<span class="fc" id="L125">            .andExpect(view().name(&quot;facility-reservation-check&quot;))</span>
+<span class="fc" id="L126">            .andExpect(model().attributeExists(&quot;reservationForm&quot;))</span>
+<span class="fc" id="L127">            .andExpect(model().attribute(&quot;facility&quot;, mockValue));</span>
+<span class="fc" id="L128">        verify(facilityService, times(1)).findById(9);</span>
+<span class="fc" id="L129">        verify(reservationService, times(1)).checkReserve(mockValue, form.getStartTime(), form.getEndTime());</span>
+<span class="fc" id="L130">    }</span>
+    
+    /**
+     * confirm L79
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void confirmTestHasErrorMonth() throws Exception {
+<span class="fc" id="L139">        when(facilityService.findById(9)).thenReturn(mockValue);</span>
+<span class="fc" id="L140">        ReservationForm form = genForm();</span>
+<span class="fc" id="L141">        form.setM(null);</span>
+
+<span class="fc" id="L143">        mockMvc.perform(</span>
+<span class="fc" id="L144">                post(root + &quot;/9/add?confirm&quot;)</span>
+<span class="fc" id="L145">                .flashAttr(&quot;reservationForm&quot;, form)  </span>
+<span class="fc" id="L146">                .with(SecurityMockMvcRequestPostProcessors.csrf()))</span>
+            // .andDo(print())
+<span class="fc" id="L148">            .andExpect(status().isOk())</span>
+<span class="fc" id="L149">            .andExpect(view().name(&quot;facility-reservation&quot;))</span>
+<span class="fc" id="L150">            .andExpect(model().attributeExists(&quot;reservationForm&quot;))</span>
+<span class="fc" id="L151">            .andExpect(model().attribute(&quot;facility&quot;, mockValue))</span>
+<span class="fc" id="L152">            .andExpect(model().hasErrors());</span>
+<span class="fc" id="L153">        verify(facilityService, times(1)).findById(9);</span>
+<span class="fc" id="L154">    }</span>
+    
+    /**
+     * confirm L90
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void confirmTestThrowBusinessException() throws Exception {
+<span class="fc" id="L163">        when(facilityService.findById(10)).thenReturn(mockValue);</span>
+        
+<span class="fc" id="L165">        ReservationForm form = genForm();</span>
+
+<span class="fc" id="L167">        doThrow(new BusinessException(&quot;業務エラー&quot;))</span>
+<span class="fc" id="L168">        .when(reservationService).checkReserve(mockValue, form.getStartTime(), form.getEndTime());</span>
+
+<span class="fc" id="L170">        mockMvc.perform(</span>
+<span class="fc" id="L171">                post(root + &quot;/10/add?confirm&quot;)</span>
+<span class="fc" id="L172">                .flashAttr(&quot;reservationForm&quot;, form)  </span>
+<span class="fc" id="L173">                .with(SecurityMockMvcRequestPostProcessors.csrf()))</span>
+            //.andDo(print())
+<span class="fc" id="L175">            .andExpect(status().isOk())</span>
+<span class="fc" id="L176">            .andExpect(view().name(&quot;facility-reservation&quot;))</span>
+<span class="fc" id="L177">            .andExpect(model().attributeExists(&quot;reservationForm&quot;))</span>
+<span class="fc" id="L178">            .andExpect(model().attribute(&quot;facility&quot;, mockValue))</span>
+<span class="fc" id="L179">            .andExpect(model().attribute(&quot;message&quot;, &quot;業務エラー&quot;))</span>
+<span class="fc" id="L180">            .andExpect(model().hasNoErrors())</span>
+<span class="fc" id="L181">            .andExpect(content().string(containsString(&quot;業務エラー&quot;)));</span>
+<span class="fc" id="L182">        verify(facilityService, times(1)).findById(10);</span>
+<span class="fc" id="L183">        verify(reservationService, times(1)).checkReserve(mockValue, form.getStartTime(), form.getEndTime());</span>
+<span class="fc" id="L184">    }</span>
+
+    /**
+     * confirm L93
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void confirmTestThrowException() throws Exception {
+<span class="fc" id="L193">        when(facilityService.findById(11)).thenReturn(mockValue);</span>
+        
+<span class="fc" id="L195">        ReservationForm form = genForm();</span>
+
+<span class="fc" id="L197">        doThrow(new DataIntegrityViolationException(&quot;サーバーエラー&quot;))</span>
+<span class="fc" id="L198">        .when(reservationService).checkReserve(mockValue, form.getStartTime(), form.getEndTime());</span>
+
+<span class="fc" id="L200">        mockMvc.perform(</span>
+<span class="fc" id="L201">                post(root + &quot;/11/add?confirm&quot;)</span>
+<span class="fc" id="L202">                .flashAttr(&quot;reservationForm&quot;, form)  </span>
+<span class="fc" id="L203">                .with(SecurityMockMvcRequestPostProcessors.csrf()))</span>
+            //.andDo(print())
+<span class="fc" id="L205">            .andExpect(status().isOk())</span>
+<span class="fc" id="L206">            .andExpect(view().name(&quot;facility-reservation&quot;))</span>
+<span class="fc" id="L207">            .andExpect(model().attributeExists(&quot;reservationForm&quot;))</span>
+<span class="fc" id="L208">            .andExpect(model().attribute(&quot;facility&quot;, mockValue))</span>
+<span class="fc" id="L209">            .andExpect(model().attribute(&quot;message&quot;, &quot;システムエラーが発生しました。&quot;))</span>
+<span class="fc" id="L210">            .andExpect(model().hasNoErrors());</span>
+<span class="fc" id="L211">        verify(facilityService, times(1)).findById(11);</span>
+<span class="fc" id="L212">        verify(reservationService, times(1)).checkReserve(mockValue, form.getStartTime(), form.getEndTime());</span>
+<span class="fc" id="L213">    }</span>
+
+    /**
+     * add
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void addTest() throws Exception {
+<span class="fc" id="L222">        when(facilityService.findById(9)).thenReturn(mockValue);</span>
+<span class="fc" id="L223">        ReservationForm form = genForm();</span>
+
+<span class="fc" id="L225">        mockMvc.perform(</span>
+<span class="fc" id="L226">                post(root + &quot;/9/add?complete&quot;)</span>
+<span class="fc" id="L227">                .flashAttr(&quot;reservationForm&quot;, form)  </span>
+<span class="fc" id="L228">                .with(SecurityMockMvcRequestPostProcessors.csrf()))</span>
+            //.andDo(print())
+<span class="fc" id="L230">            .andExpect(status().isFound())</span>
+<span class="fc" id="L231">            .andExpect(redirectedUrl(&quot;/reservation/9/add?complete&quot;));</span>
+<span class="fc" id="L232">        verify(facilityService, times(1)).findById(9);</span>
+<span class="fc" id="L233">        verify(reservationService, times(1)).reserve((ReservationEntity) any());</span>
+<span class="fc" id="L234">    }</span>
+    
+    /**
+     * add L104
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void addTestHasErrorDate() throws Exception {
+<span class="fc" id="L243">        when(facilityService.findById(9)).thenReturn(mockValue);</span>
+<span class="fc" id="L244">        ReservationForm form = genForm();</span>
+<span class="fc" id="L245">        form.setD(null);</span>
+
+<span class="fc" id="L247">        mockMvc.perform(</span>
+<span class="fc" id="L248">                post(root + &quot;/9/add?complete&quot;)</span>
+<span class="fc" id="L249">                .flashAttr(&quot;reservationForm&quot;, form)  </span>
+<span class="fc" id="L250">                .with(SecurityMockMvcRequestPostProcessors.csrf()))</span>
+            // .andDo(print())
+<span class="fc" id="L252">            .andExpect(status().isOk())</span>
+<span class="fc" id="L253">            .andExpect(view().name(&quot;facility-reservation&quot;))</span>
+<span class="fc" id="L254">            .andExpect(model().attributeExists(&quot;reservationForm&quot;))</span>
+<span class="fc" id="L255">            .andExpect(model().attribute(&quot;facility&quot;, mockValue))</span>
+<span class="fc" id="L256">            .andExpect(model().hasErrors());</span>
+<span class="fc" id="L257">        verify(facilityService, times(1)).findById(9);</span>
+<span class="fc" id="L258">        verify(reservationService, never()).reserve((ReservationEntity) any());</span>
+<span class="fc" id="L259">    }</span>
+    
+    /**
+     * add L119
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void addTestThrowBusinessException() throws Exception {
+<span class="fc" id="L268">        when(facilityService.findById(10)).thenReturn(mockValue);</span>
+        
+<span class="fc" id="L270">        ReservationForm form = genForm();</span>
+
+<span class="fc" id="L272">        doThrow(new BusinessException(&quot;業務エラー&quot;))</span>
+<span class="fc" id="L273">        .when(reservationService).reserve((ReservationEntity) any());</span>
+
+<span class="fc" id="L275">        mockMvc.perform(</span>
+<span class="fc" id="L276">                post(root + &quot;/10/add?complete&quot;)</span>
+<span class="fc" id="L277">                .flashAttr(&quot;reservationForm&quot;, form)  </span>
+<span class="fc" id="L278">                .with(SecurityMockMvcRequestPostProcessors.csrf()))</span>
+            //.andDo(print())
+<span class="fc" id="L280">            .andExpect(status().isOk())</span>
+<span class="fc" id="L281">            .andExpect(view().name(&quot;facility-reservation&quot;))</span>
+<span class="fc" id="L282">            .andExpect(model().attributeExists(&quot;reservationForm&quot;))</span>
+<span class="fc" id="L283">            .andExpect(model().attribute(&quot;facility&quot;, mockValue))</span>
+<span class="fc" id="L284">            .andExpect(model().attribute(&quot;message&quot;, &quot;業務エラー&quot;))</span>
+<span class="fc" id="L285">            .andExpect(model().hasNoErrors())</span>
+<span class="fc" id="L286">            .andExpect(content().string(containsString(&quot;業務エラー&quot;)));</span>
+<span class="fc" id="L287">        verify(facilityService, times(1)).findById(10);</span>
+<span class="fc" id="L288">        verify(reservationService, times(1)).reserve((ReservationEntity) any());</span>
+<span class="fc" id="L289">    }</span>
+
+    /**
+     * add L122
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void addTestThrowException() throws Exception {
+<span class="fc" id="L298">        FacilityEntity mockValue = MockFacility.genFacilityEntity();</span>
+<span class="fc" id="L299">        when(facilityService.findById(11)).thenReturn(mockValue);</span>
+        
+<span class="fc" id="L301">        ReservationForm form = genForm();</span>
+
+<span class="fc" id="L303">        doThrow(new DataIntegrityViolationException(&quot;サーバーエラー&quot;))</span>
+<span class="fc" id="L304">        .when(reservationService).reserve((ReservationEntity) any());</span>
+
+<span class="fc" id="L306">        mockMvc.perform(</span>
+<span class="fc" id="L307">                post(root + &quot;/11/add?complete&quot;)</span>
+<span class="fc" id="L308">                .flashAttr(&quot;reservationForm&quot;, form)  </span>
+<span class="fc" id="L309">                .with(SecurityMockMvcRequestPostProcessors.csrf()))</span>
+            //.andDo(print())
+<span class="fc" id="L311">            .andExpect(status().isOk())</span>
+<span class="fc" id="L312">            .andExpect(view().name(&quot;facility-reservation&quot;))</span>
+<span class="fc" id="L313">            .andExpect(model().attributeExists(&quot;reservationForm&quot;))</span>
+<span class="fc" id="L314">            .andExpect(model().attribute(&quot;facility&quot;, mockValue))</span>
+<span class="fc" id="L315">            .andExpect(model().attribute(&quot;message&quot;, &quot;システムエラーが発生しました。&quot;))</span>
+<span class="fc" id="L316">            .andExpect(model().hasNoErrors());</span>
+<span class="fc" id="L317">        verify(facilityService, times(1)).findById(11);</span>
+<span class="fc" id="L318">        verify(reservationService, times(1)).reserve((ReservationEntity) any());</span>
+<span class="fc" id="L319">    }</span>
+    
+    /**
+     * completion
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void completionTest() throws Exception {
+<span class="fc" id="L328">        mockMvc.perform(get(root + &quot;/999/add?complete&quot;))</span>
+            //.andDo(print())
+<span class="fc" id="L330">            .andExpect(status().isOk())</span>
+<span class="fc" id="L331">            .andExpect(view().name(&quot;common-completion&quot;))</span>
+<span class="fc" id="L332">            .andExpect(model().attribute(&quot;message&quot;, &quot;予約&quot;));</span>
+<span class="fc" id="L333">    }</span>
+    
+    private ReservationForm genForm() {
+<span class="fc" id="L336">        ReservationForm form = new ReservationForm();</span>
+<span class="fc" id="L337">        form.setReservationId(1);</span>
+<span class="fc" id="L338">        form.setY(2021);</span>
+<span class="fc" id="L339">        form.setM(1);</span>
+<span class="fc" id="L340">        form.setD(1);</span>
+        // TODO: 相関チェックが必要？
+<span class="fc" id="L342">        form.setStartHour(&quot;10&quot;);</span>
+<span class="fc" id="L343">        form.setStartMin(&quot;00&quot;);</span>
+<span class="fc" id="L344">        form.setEndHour(&quot;9&quot;);</span>
+<span class="fc" id="L345">        form.setEndMin(&quot;00&quot;);</span>
+<span class="fc" id="L346">        return form;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span>java (2021/09/04 14:42:56)</div></body></html>

@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>FacilityUpdateControllerTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">java (2021/09/04 14:42:56)</a> &gt; <a href="../../index.html" class="el_group">facility_reservation</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">com.example.facilityreservation.web</a> &gt; <span class="el_source">FacilityUpdateControllerTest.java</span></div><h1>FacilityUpdateControllerTest.java</h1><pre class="source lang-java linenums">package com.example.facilityreservation.web;
+
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.eq;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+
+import com.example.facilityreservation.domain.entity.FacilityEntity;
+import com.example.facilityreservation.domain.entity.FacilityTypeEntity;
+import com.example.facilityreservation.domain.entity.UserEntity;
+import com.example.facilityreservation.exception.BusinessException;
+import com.example.facilityreservation.service.FacilityService;
+import com.example.facilityreservation.service.FacilityTypeService;
+import com.example.facilityreservation.utility.MockFacility;
+import com.example.facilityreservation.utility.WithMockCustomUser;
+import com.example.facilityreservation.web.form.FacilityForm;
+
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@TestPropertySource(locations = &quot;/application-test.properties&quot;)
+<span class="fc" id="L48">public class FacilityUpdateControllerTest {</span>
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private FacilityService facilityService;
+
+    @MockBean
+    private FacilityTypeService facilityTypeService;
+
+<span class="fc" id="L59">    private String root = &quot;/admin/facility/&quot;;</span>
+    
+<span class="fc" id="L61">    private FacilityEntity mockFacilityEntity = MockFacility.genFacilityEntity();</span>
+
+<span class="fc" id="L63">    private List&lt;FacilityTypeEntity&gt; mockFacilityTypes = MockFacility.genMockFacilityTypes();</span>
+
+    @BeforeEach
+    void setup() {
+<span class="fc" id="L67">        clearInvocations(facilityService);</span>
+<span class="fc" id="L68">        clearInvocations(facilityTypeService);</span>
+<span class="fc" id="L69">        when(facilityTypeService.list()).thenReturn(mockFacilityTypes);</span>
+<span class="fc" id="L70">    }</span>
+
+    /**
+     * index
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void indexTest() throws Exception {
+<span class="fc" id="L79">        when(facilityService.findById(7)).thenReturn(mockFacilityEntity);</span>
+        
+<span class="fc" id="L81">        mockMvc.perform(get(root + &quot;/update/7&quot;))</span>
+            //.andDo(print())
+<span class="fc" id="L83">            .andExpect(status().isOk())</span>
+<span class="fc" id="L84">            .andExpect(view().name(&quot;facility-update&quot;))</span>
+<span class="fc" id="L85">            .andExpect(model().attributeExists(&quot;facilityForm&quot;))</span>
+<span class="fc" id="L86">            .andExpect(model().attribute(&quot;types&quot;, mockFacilityTypes));</span>
+<span class="fc" id="L87">        verify(facilityService, times(1)).findById(7);</span>
+<span class="fc" id="L88">        verify(facilityTypeService, times(1)).list();</span>
+<span class="fc" id="L89">    }</span>
+
+    /**
+     * index、ADMINユーザー以外
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser(roles = {&quot;USER&quot;})
+    public void indexTestNotAdmin() throws Exception {
+<span class="fc" id="L98">        when(facilityService.findById(7)).thenReturn(mockFacilityEntity);</span>
+        
+<span class="fc" id="L100">        mockMvc.perform(get(root + &quot;/update/7&quot;))</span>
+            //.andDo(print())
+<span class="fc" id="L102">            .andExpect(status().isForbidden());</span>
+<span class="fc" id="L103">        verify(facilityService, never()).findById(7);</span>
+<span class="fc" id="L104">        verify(facilityTypeService, never()).list();</span>
+<span class="fc" id="L105">    }</span>
+
+    /**
+     * update_redo
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void update_redoTest() throws Exception {
+<span class="fc" id="L114">        FacilityForm form = genForm(8, &quot;テスト&quot;, 1, 1);</span>
+
+<span class="fc" id="L116">        mockMvc.perform(</span>
+<span class="fc" id="L117">                post(root + &quot;/update/8?redo&quot;)</span>
+<span class="fc" id="L118">                .flashAttr(&quot;facilityForm&quot;, form)  </span>
+<span class="fc" id="L119">                .with(SecurityMockMvcRequestPostProcessors.csrf()))</span>
+            //.andDo(print())
+<span class="fc" id="L121">            .andExpect(status().isOk())</span>
+<span class="fc" id="L122">            .andExpect(view().name(&quot;facility-update&quot;))</span>
+<span class="fc" id="L123">            .andExpect(model().attribute(&quot;facilityForm&quot;, form))</span>
+<span class="fc" id="L124">            .andExpect(model().attribute(&quot;types&quot;, mockFacilityTypes));</span>
+<span class="fc" id="L125">        verify(facilityTypeService, times(1)).list();</span>
+<span class="fc" id="L126">    }</span>
+    
+    /**
+     * update_confirm
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void update_confirmTest() throws Exception {
+<span class="fc" id="L135">        FacilityForm form = genForm(9, &quot;テスト&quot;, 1, 1);</span>
+
+<span class="fc" id="L137">        mockMvc.perform(</span>
+<span class="fc" id="L138">                post(root + &quot;/update/9?update_confirm&quot;)</span>
+<span class="fc" id="L139">                .flashAttr(&quot;facilityForm&quot;, form)  </span>
+<span class="fc" id="L140">                .with(SecurityMockMvcRequestPostProcessors.csrf()))</span>
+            //.andDo(print())
+<span class="fc" id="L142">            .andExpect(status().isOk())</span>
+<span class="fc" id="L143">            .andExpect(view().name(&quot;facility-update-check&quot;))</span>
+<span class="fc" id="L144">            .andExpect(model().attribute(&quot;types&quot;, mockFacilityTypes));</span>
+<span class="fc" id="L145">        verify(facilityService, times(1)).updateConfirm(9);</span>
+<span class="fc" id="L146">        verify(facilityTypeService, times(1)).list();</span>
+<span class="fc" id="L147">    }</span>
+    
+    /**
+     * update_confirm L73
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void update_confirmTestHasErrorCap() throws Exception {
+<span class="fc" id="L156">        FacilityForm form = genForm(9, &quot;テスト&quot;, 1, 0);</span>
+
+<span class="fc" id="L158">        mockMvc.perform(</span>
+<span class="fc" id="L159">                post(root + &quot;/update/9?update_confirm&quot;)</span>
+<span class="fc" id="L160">                .flashAttr(&quot;facilityForm&quot;, form)  </span>
+<span class="fc" id="L161">                .with(SecurityMockMvcRequestPostProcessors.csrf()))</span>
+            //.andDo(print())
+<span class="fc" id="L163">            .andExpect(status().isOk())</span>
+<span class="fc" id="L164">            .andExpect(view().name(&quot;facility-update&quot;))</span>
+<span class="fc" id="L165">            .andExpect(model().attribute(&quot;facilityForm&quot;, form))</span>
+<span class="fc" id="L166">            .andExpect(model().attribute(&quot;types&quot;, mockFacilityTypes))</span>
+<span class="fc" id="L167">            .andExpect(model().hasErrors());</span>
+<span class="fc" id="L168">        verify(facilityService, never()).updateConfirm(9);</span>
+<span class="fc" id="L169">        verify(facilityTypeService, times(1)).list();</span>
+<span class="fc" id="L170">    }</span>
+    
+    /**
+     * update_confirm L81
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void update_confirmThrowBusinessException() throws Exception {
+<span class="fc" id="L179">        FacilityForm form = genForm(10, &quot;テスト&quot;, 1, 1);</span>
+
+<span class="fc" id="L181">        doThrow(new BusinessException(&quot;業務エラー&quot;))</span>
+<span class="fc" id="L182">        .when(facilityService).updateConfirm(10);</span>
+
+<span class="fc" id="L184">        mockMvc.perform(</span>
+<span class="fc" id="L185">                post(root + &quot;/update/10?update_confirm&quot;)</span>
+<span class="fc" id="L186">                .flashAttr(&quot;facilityForm&quot;, form)  </span>
+<span class="fc" id="L187">                .with(SecurityMockMvcRequestPostProcessors.csrf()))</span>
+            //.andDo(print())
+<span class="fc" id="L189">            .andExpect(status().isOk())</span>
+<span class="fc" id="L190">            .andExpect(view().name(&quot;facility-update&quot;))</span>
+<span class="fc" id="L191">            .andExpect(model().attribute(&quot;facilityForm&quot;, form))</span>
+<span class="fc" id="L192">            .andExpect(model().attribute(&quot;types&quot;, mockFacilityTypes))</span>
+<span class="fc" id="L193">            .andExpect(model().attribute(&quot;error&quot;, &quot;業務エラー&quot;))</span>
+<span class="fc" id="L194">            .andExpect(model().hasNoErrors())</span>
+<span class="fc" id="L195">            .andExpect(content().string(containsString(&quot;業務エラー&quot;)));</span>
+<span class="fc" id="L196">        verify(facilityService, times(1)).updateConfirm(10);</span>
+<span class="fc" id="L197">        verify(facilityTypeService, times(1)).list();</span>
+<span class="fc" id="L198">    }</span>
+
+    /**
+     * update_confirm L84
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void update_confirmTestThrowException() throws Exception {
+<span class="fc" id="L207">        FacilityForm form = genForm(11, &quot;テスト&quot;, 1, 1);</span>
+
+<span class="fc" id="L209">        doThrow(new DataIntegrityViolationException(&quot;サーバーエラー&quot;))</span>
+<span class="fc" id="L210">        .when(facilityService).updateConfirm(11);</span>
+
+<span class="fc" id="L212">        mockMvc.perform(</span>
+<span class="fc" id="L213">                post(root + &quot;/update/11?update_confirm&quot;)</span>
+<span class="fc" id="L214">                .flashAttr(&quot;facilityForm&quot;, form)  </span>
+<span class="fc" id="L215">                .with(SecurityMockMvcRequestPostProcessors.csrf()))</span>
+            //.andDo(print())
+<span class="fc" id="L217">            .andExpect(status().isOk())</span>
+<span class="fc" id="L218">            .andExpect(view().name(&quot;facility-update&quot;))</span>
+<span class="fc" id="L219">            .andExpect(model().attribute(&quot;facilityForm&quot;, form))</span>
+<span class="fc" id="L220">            .andExpect(model().attribute(&quot;types&quot;, mockFacilityTypes))</span>
+<span class="fc" id="L221">            .andExpect(model().attribute(&quot;error&quot;, &quot;システムエラーが発生しました。&quot;))</span>
+<span class="fc" id="L222">            .andExpect(model().hasNoErrors());</span>
+<span class="fc" id="L223">        verify(facilityService, times(1)).updateConfirm(11);</span>
+<span class="fc" id="L224">        verify(facilityTypeService, times(1)).list();</span>
+<span class="fc" id="L225">    }</span>
+
+    /**
+     * update
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void updateTest() throws Exception {
+<span class="fc" id="L234">        FacilityForm form = genForm(9, &quot;テスト&quot;, 1, 1);</span>
+
+<span class="fc" id="L236">        mockMvc.perform(</span>
+<span class="fc" id="L237">                post(root + &quot;/update/9?complete&quot;)</span>
+<span class="fc" id="L238">                .flashAttr(&quot;facilityForm&quot;, form)  </span>
+<span class="fc" id="L239">                .with(SecurityMockMvcRequestPostProcessors.csrf()))</span>
+            //.andDo(print())
+<span class="fc" id="L241">            .andExpect(status().isFound())</span>
+<span class="fc" id="L242">            .andExpect(redirectedUrl(&quot;/admin/facility/update/?complete&quot;));</span>
+<span class="fc" id="L243">        verify(facilityService, times(1)).update(eq(form), (UserEntity) any(), eq(9));</span>
+<span class="fc" id="L244">        verify(facilityTypeService, times(1)).list();</span>
+<span class="fc" id="L245">    }</span>
+    
+    /**
+     * update L93
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void updateTestHasErrorName() throws Exception {
+<span class="fc" id="L254">        FacilityForm form = genForm(10, &quot;テストテストテストテスト&quot;, 1, 1);</span>
+
+<span class="fc" id="L256">        mockMvc.perform(</span>
+<span class="fc" id="L257">                post(root + &quot;/update/10?complete&quot;)</span>
+<span class="fc" id="L258">                .flashAttr(&quot;facilityForm&quot;, form)  </span>
+<span class="fc" id="L259">                .with(SecurityMockMvcRequestPostProcessors.csrf()))</span>
+            // .andDo(print())
+<span class="fc" id="L261">            .andExpect(status().isOk())</span>
+<span class="fc" id="L262">            .andExpect(view().name(&quot;facility-update&quot;))</span>
+<span class="fc" id="L263">            .andExpect(model().attribute(&quot;facilityForm&quot;, form))</span>
+<span class="fc" id="L264">            .andExpect(model().attribute(&quot;types&quot;, mockFacilityTypes))</span>
+<span class="fc" id="L265">            .andExpect(model().hasErrors());</span>
+<span class="fc" id="L266">        verify(facilityService, never()).update(eq(form), (UserEntity) any(), eq(10));</span>
+<span class="fc" id="L267">        verify(facilityTypeService, times(1)).list();</span>
+<span class="fc" id="L268">    }</span>
+    
+    /**
+     * update L101
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void updateTestThrowBusinessException() throws Exception {
+<span class="fc" id="L277">        FacilityForm form = genForm(11, &quot;テスト&quot;, 1, 1);</span>
+        
+<span class="fc" id="L279">        doThrow(new BusinessException(&quot;業務エラー&quot;))</span>
+<span class="fc" id="L280">        .when(facilityService).update(eq(form), (UserEntity) any(), eq(11));</span>
+
+<span class="fc" id="L282">        mockMvc.perform(</span>
+<span class="fc" id="L283">                post(root + &quot;/update/11?complete&quot;)</span>
+<span class="fc" id="L284">                .flashAttr(&quot;facilityForm&quot;, form)  </span>
+<span class="fc" id="L285">                .with(SecurityMockMvcRequestPostProcessors.csrf()))</span>
+            //.andDo(print())
+<span class="fc" id="L287">            .andExpect(status().isOk())</span>
+<span class="fc" id="L288">            .andExpect(view().name(&quot;facility-update&quot;))</span>
+<span class="fc" id="L289">            .andExpect(model().attribute(&quot;facilityForm&quot;, form))</span>
+<span class="fc" id="L290">            .andExpect(model().attribute(&quot;types&quot;, mockFacilityTypes))</span>
+<span class="fc" id="L291">            .andExpect(model().attribute(&quot;error&quot;, &quot;業務エラー&quot;))</span>
+<span class="fc" id="L292">            .andExpect(model().hasNoErrors())</span>
+<span class="fc" id="L293">            .andExpect(content().string(containsString(&quot;業務エラー&quot;)));</span>
+<span class="fc" id="L294">        verify(facilityService, times(1)).update(eq(form), (UserEntity) any(), eq(11));</span>
+<span class="fc" id="L295">        verify(facilityTypeService, times(1)).list();</span>
+<span class="fc" id="L296">    }</span>
+
+    /**
+     * update L104
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void updateTestThrowException() throws Exception {
+<span class="fc" id="L305">        FacilityForm form = genForm(12, &quot;テスト&quot;, 1, 1);</span>
+
+<span class="fc" id="L307">        doThrow(new DataIntegrityViolationException(&quot;サーバーエラー&quot;))</span>
+<span class="fc" id="L308">        .when(facilityService).update(eq(form), (UserEntity) any(), eq(12));</span>
+
+<span class="fc" id="L310">        mockMvc.perform(</span>
+<span class="fc" id="L311">                post(root + &quot;/update/12?complete&quot;)</span>
+<span class="fc" id="L312">                .flashAttr(&quot;facilityForm&quot;, form)  </span>
+<span class="fc" id="L313">                .with(SecurityMockMvcRequestPostProcessors.csrf()))</span>
+            //.andDo(print())
+<span class="fc" id="L315">            .andExpect(status().isOk())</span>
+<span class="fc" id="L316">            .andExpect(view().name(&quot;facility-update&quot;))</span>
+<span class="fc" id="L317">            .andExpect(model().attribute(&quot;facilityForm&quot;, form))</span>
+<span class="fc" id="L318">            .andExpect(model().attribute(&quot;types&quot;, mockFacilityTypes))</span>
+<span class="fc" id="L319">            .andExpect(model().attribute(&quot;error&quot;, &quot;システムエラーが発生しました。&quot;))</span>
+<span class="fc" id="L320">            .andExpect(model().hasNoErrors());</span>
+<span class="fc" id="L321">        verify(facilityService, times(1)).update(eq(form), (UserEntity) any(), eq(12));</span>
+<span class="fc" id="L322">        verify(facilityTypeService, times(1)).list();</span>
+<span class="fc" id="L323">    }</span>
+    
+    /**
+     * update_completion
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void update_completionTest() throws Exception {
+<span class="fc" id="L332">        mockMvc.perform(get(root + &quot;/update?complete&quot;))</span>
+            //.andDo(print())
+<span class="fc" id="L334">            .andExpect(status().isOk())</span>
+<span class="fc" id="L335">            .andExpect(view().name(&quot;common-completion&quot;))</span>
+<span class="fc" id="L336">            .andExpect(model().attribute(&quot;message&quot;, &quot;施設情報の更新&quot;));</span>
+<span class="fc" id="L337">    }</span>
+    
+    /**
+     * delete
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void deleteTest() throws Exception {
+<span class="fc" id="L346">        FacilityForm form = genForm(9, &quot;テスト&quot;, 1, 1);</span>
+
+<span class="fc" id="L348">        mockMvc.perform(</span>
+<span class="fc" id="L349">                post(root + &quot;/delete/9?complete&quot;)</span>
+<span class="fc" id="L350">                .flashAttr(&quot;facilityForm&quot;, form)  </span>
+<span class="fc" id="L351">                .with(SecurityMockMvcRequestPostProcessors.csrf()))</span>
+            //.andDo(print())
+<span class="fc" id="L353">            .andExpect(status().isFound())</span>
+<span class="fc" id="L354">            .andExpect(redirectedUrl(&quot;/admin/facility/delete/?complete&quot;));</span>
+<span class="fc" id="L355">        verify(facilityService, times(1)).deleteById(9);</span>
+<span class="fc" id="L356">        verify(facilityTypeService, times(1)).list();</span>
+<span class="fc" id="L357">    }</span>
+    
+    /**
+     * delete L154
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void deleteTestHasErrorTypeId() throws Exception {
+<span class="fc" id="L366">        FacilityForm form = genForm(10, &quot;テスト&quot;, 0, 1);</span>
+
+<span class="fc" id="L368">        mockMvc.perform(</span>
+<span class="fc" id="L369">                post(root + &quot;/delete/10?complete&quot;)</span>
+<span class="fc" id="L370">                .flashAttr(&quot;facilityForm&quot;, form)  </span>
+<span class="fc" id="L371">                .with(SecurityMockMvcRequestPostProcessors.csrf()))</span>
+            // .andDo(print())
+<span class="fc" id="L373">            .andExpect(status().isOk())</span>
+<span class="fc" id="L374">            .andExpect(view().name(&quot;facility-update&quot;))</span>
+<span class="fc" id="L375">            .andExpect(model().attribute(&quot;facilityForm&quot;, form))</span>
+<span class="fc" id="L376">            .andExpect(model().attribute(&quot;types&quot;, mockFacilityTypes))</span>
+<span class="fc" id="L377">            .andExpect(model().hasErrors());</span>
+<span class="fc" id="L378">        verify(facilityService, never()).deleteById(10);</span>
+<span class="fc" id="L379">        verify(facilityTypeService, times(1)).list();</span>
+<span class="fc" id="L380">    }</span>
+    
+    /**
+     * delete L162
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void deleteTestThrowBusinessException() throws Exception {
+<span class="fc" id="L389">        FacilityForm form = genForm(11, &quot;テスト&quot;, 1, 1);</span>
+        
+<span class="fc" id="L391">        doThrow(new BusinessException(&quot;業務エラー&quot;))</span>
+<span class="fc" id="L392">        .when(facilityService).deleteById(11);</span>
+
+<span class="fc" id="L394">        mockMvc.perform(</span>
+<span class="fc" id="L395">                post(root + &quot;/delete/11?complete&quot;)</span>
+<span class="fc" id="L396">                .flashAttr(&quot;facilityForm&quot;, form)  </span>
+<span class="fc" id="L397">                .with(SecurityMockMvcRequestPostProcessors.csrf()))</span>
+            //.andDo(print())
+<span class="fc" id="L399">            .andExpect(status().isOk())</span>
+<span class="fc" id="L400">            .andExpect(view().name(&quot;facility-update&quot;))</span>
+<span class="fc" id="L401">            .andExpect(model().attribute(&quot;facilityForm&quot;, form))</span>
+<span class="fc" id="L402">            .andExpect(model().attribute(&quot;types&quot;, mockFacilityTypes))</span>
+<span class="fc" id="L403">            .andExpect(model().attribute(&quot;error&quot;, &quot;業務エラー&quot;))</span>
+<span class="fc" id="L404">            .andExpect(model().hasNoErrors())</span>
+<span class="fc" id="L405">            .andExpect(content().string(containsString(&quot;業務エラー&quot;)));</span>
+<span class="fc" id="L406">        verify(facilityService, times(1)).deleteById(11);</span>
+<span class="fc" id="L407">        verify(facilityTypeService, times(1)).list();</span>
+<span class="fc" id="L408">    }</span>
+
+    /**
+     * delete L165
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void deleteTestThrowException() throws Exception {
+<span class="fc" id="L417">        FacilityForm form = genForm(12, &quot;テスト&quot;, 1, 1);</span>
+
+<span class="fc" id="L419">        doThrow(new DataIntegrityViolationException(&quot;サーバーエラー&quot;))</span>
+<span class="fc" id="L420">        .when(facilityService).deleteById(12);</span>
+
+<span class="fc" id="L422">        mockMvc.perform(</span>
+<span class="fc" id="L423">                post(root + &quot;/delete/12?complete&quot;)</span>
+<span class="fc" id="L424">                .flashAttr(&quot;facilityForm&quot;, form)  </span>
+<span class="fc" id="L425">                .with(SecurityMockMvcRequestPostProcessors.csrf()))</span>
+            //.andDo(print())
+<span class="fc" id="L427">            .andExpect(status().isOk())</span>
+<span class="fc" id="L428">            .andExpect(view().name(&quot;facility-update&quot;))</span>
+<span class="fc" id="L429">            .andExpect(model().attribute(&quot;facilityForm&quot;, form))</span>
+<span class="fc" id="L430">            .andExpect(model().attribute(&quot;types&quot;, mockFacilityTypes))</span>
+<span class="fc" id="L431">            .andExpect(model().attribute(&quot;error&quot;, &quot;システムエラーが発生しました。&quot;))</span>
+<span class="fc" id="L432">            .andExpect(model().hasNoErrors());</span>
+<span class="fc" id="L433">        verify(facilityService, times(1)).deleteById(12);</span>
+<span class="fc" id="L434">        verify(facilityTypeService, times(1)).list();</span>
+<span class="fc" id="L435">    }</span>
+    
+    /**
+     * delete_completion
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void delete_completionTest() throws Exception {
+<span class="fc" id="L444">        mockMvc.perform(get(root + &quot;/delete?complete&quot;))</span>
+            //.andDo(print())
+<span class="fc" id="L446">            .andExpect(status().isOk())</span>
+<span class="fc" id="L447">            .andExpect(view().name(&quot;common-completion&quot;))</span>
+<span class="fc" id="L448">            .andExpect(model().attribute(&quot;message&quot;, &quot;施設情報の削除&quot;));</span>
+<span class="fc" id="L449">    }</span>
+
+    private FacilityForm genForm(int id, String name, int typeId, int capacity) {
+<span class="fc" id="L452">        FacilityForm form = new FacilityForm();</span>
+<span class="fc" id="L453">        form.setId(id);</span>
+<span class="fc" id="L454">        form.setName(name);</span>
+<span class="fc" id="L455">        form.setTypeId(typeId);</span>
+<span class="fc" id="L456">        form.setCapacity(capacity);</span>
+<span class="fc" id="L457">        return form;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span>java (2021/09/04 14:42:56)</div></body></html>
