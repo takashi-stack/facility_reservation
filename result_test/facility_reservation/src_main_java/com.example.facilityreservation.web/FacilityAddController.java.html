@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>FacilityAddController.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">java (2021/09/04 14:42:56)</a> &gt; <a href="../../index.html" class="el_group">facility_reservation</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.facilityreservation.web</a> &gt; <span class="el_source">FacilityAddController.java</span></div><h1>FacilityAddController.java</h1><pre class="source lang-java linenums">package com.example.facilityreservation.web;
+
+import java.security.Principal;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
+
+import com.example.facilityreservation.service.FacilityService;
+import com.example.facilityreservation.service.FacilityTypeService;
+import com.example.facilityreservation.web.form.FacilityForm;
+
+@Controller
+@RequestMapping(value = &quot;/admin/facility/&quot;)
+@SessionAttributes(types = FacilityForm.class)
+<span class="fc" id="L23">public class FacilityAddController extends BaseController {</span>
+
+    @Autowired
+    private FacilityService facilityService;
+
+    @Autowired
+    private FacilityTypeService facilityTypeService;
+
+    @ModelAttribute(&quot;facilityForm&quot;)
+    public FacilityForm setupForm() {
+<span class="fc" id="L33">        return new FacilityForm();</span>
+    }
+
+    @RequestMapping(path = &quot;/add&quot;, method = RequestMethod.GET)
+    public String index(Model model) {
+<span class="fc" id="L38">        model.addAttribute(&quot;types&quot;, facilityTypeService.list());</span>
+<span class="fc" id="L39">        return &quot;facility-add&quot;;</span>
+    }
+
+    @RequestMapping(path = &quot;/add&quot;, params = &quot;redo&quot;, method = RequestMethod.POST)
+    public String redo(@Validated FacilityForm form, BindingResult result,
+                       Model model) {
+<span class="fc" id="L45">        return index(model);</span>
+    }
+
+    @RequestMapping(path = &quot;/add&quot;, params = &quot;confirm&quot;, method = RequestMethod.POST)
+    public String confirm(@Validated FacilityForm form, BindingResult result,
+                          Model model) {
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        if (result.hasErrors()) {</span>
+<span class="fc" id="L52">            return index(model);</span>
+        }
+
+        try {
+<span class="fc" id="L56">            model.addAttribute(&quot;types&quot;, facilityTypeService.list());</span>
+<span class="fc" id="L57">            return &quot;facility-add-check&quot;;</span>
+<span class="nc" id="L58">        } catch (Exception e) {</span>
+<span class="nc" id="L59">            model.addAttribute(&quot;error&quot;, &quot;システムエラーが発生しました。&quot;);</span>
+<span class="nc" id="L60">            return index(model);</span>
+        }
+    }
+
+    @RequestMapping(path = &quot;/add&quot;, params = &quot;complete&quot;, method = RequestMethod.POST)
+    public String add(Principal principal, @Validated FacilityForm form,
+                      BindingResult result, Model model) {
+
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        if (result.hasErrors()) return index(model);</span>
+
+        try {
+<span class="fc" id="L71">            facilityService.add(form, getLoginUser(principal));</span>
+<span class="fc" id="L72">            return &quot;redirect:/admin/facility/add?complete&quot;;</span>
+<span class="fc" id="L73">        } catch (Exception e) {</span>
+<span class="fc" id="L74">            model.addAttribute(&quot;error&quot;, &quot;システムエラーが発生しました。&quot;);</span>
+<span class="fc" id="L75">            return index(model);</span>
+        }
+    }
+
+    @RequestMapping(value = &quot;/add&quot;, params = &quot;complete&quot;, method = RequestMethod.GET)
+    public String user_add_completion(Model model,
+                                      SessionStatus sessionStatus) {
+<span class="fc" id="L82">        sessionStatus.setComplete();</span>
+<span class="fc" id="L83">        model.addAttribute(&quot;message&quot;, &quot;施設情報登録&quot;);</span>
+<span class="fc" id="L84">        return &quot;common-completion&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span>java (2021/09/04 14:42:56)</div></body></html>

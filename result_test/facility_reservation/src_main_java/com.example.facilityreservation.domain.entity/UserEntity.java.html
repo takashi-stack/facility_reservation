@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>UserEntity.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">java (2021/09/04 14:42:56)</a> &gt; <a href="../../index.html" class="el_group">facility_reservation</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.facilityreservation.domain.entity</a> &gt; <span class="el_source">UserEntity.java</span></div><h1>UserEntity.java</h1><pre class="source lang-java linenums">package com.example.facilityreservation.domain.entity;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import lombok.ToString;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import com.example.facilityreservation.domain.enums.PermissionLevel;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+<span class="fc" id="L26">@NoArgsConstructor</span>
+<span class="nc" id="L27">@AllArgsConstructor</span>
+<span class="fc" id="L28">@Setter</span>
+<span class="fc" id="L29">@Getter</span>
+<span class="fc" id="L30">@ToString</span>
+@Entity
+@Table(name = &quot;user&quot;)
+public class UserEntity implements UserDetails {
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @Column(length = 10)
+    private String id;
+
+    @Column(length = 20, nullable = false)
+    private String password;
+
+    @Column(length = 1, nullable = false)
+    @Enumerated(EnumType.ORDINAL)
+    private PermissionLevel permissionLevel;
+
+    @Column(length = 100)
+    private String note;
+
+    @Override
+    public Collection&lt;? extends GrantedAuthority&gt; getAuthorities() {
+<span class="fc" id="L52">        List&lt;GrantedAuthority&gt; authorities = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L53">        authorities.add(new SimpleGrantedAuthority(permissionLevel.toString()));</span>
+<span class="fc" id="L54">        return authorities;</span>
+    }
+
+    @Override
+    public String getUsername() {
+<span class="fc" id="L59">        return id;</span>
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+<span class="nc" id="L64">        return true;</span>
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+<span class="nc" id="L69">        return true;</span>
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+<span class="nc" id="L74">        return true;</span>
+    }
+
+    @Override
+    public boolean isEnabled() {
+<span class="nc" id="L79">        return true;</span>
+    }
+
+    public void setPermissionLevel(PermissionLevel permission) {
+<span class="fc" id="L83">        permissionLevel = permission;</span>
+<span class="fc" id="L84">    }</span>
+
+    public void setPermissionLevel(Integer index) {
+<span class="fc" id="L87">        permissionLevel = PermissionLevel.values()[index];</span>
+<span class="fc" id="L88">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span>java (2021/09/04 14:42:56)</div></body></html>
