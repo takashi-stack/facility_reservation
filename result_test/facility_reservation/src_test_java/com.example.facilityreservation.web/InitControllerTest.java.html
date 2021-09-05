@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>InitControllerTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">java (2021/09/04 14:42:56)</a> &gt; <a href="../../index.html" class="el_group">facility_reservation</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">com.example.facilityreservation.web</a> &gt; <span class="el_source">InitControllerTest.java</span></div><h1>InitControllerTest.java</h1><pre class="source lang-java linenums">package com.example.facilityreservation.web;
+
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+
+import com.example.facilityreservation.service.InitService;
+import com.example.facilityreservation.utility.WithMockCustomUser;
+
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@TestPropertySource(locations = &quot;/application-test.properties&quot;)
+<span class="fc" id="L35">public class InitControllerTest {</span>
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private InitService initService;
+    
+<span class="fc" id="L43">    private String root = &quot;/admin/init&quot;;</span>
+    
+    @BeforeEach
+    void setup() {
+<span class="fc" id="L47">        clearInvocations(initService);</span>
+<span class="fc" id="L48">    }</span>
+    
+    /**
+     * ADMINユーザー
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void indexTest() throws Exception {
+<span class="fc" id="L57">        mockMvc.perform(get(root))</span>
+            //.andDo(print())
+<span class="fc" id="L59">            .andExpect(status().isOk())</span>
+<span class="fc" id="L60">            .andExpect(view().name(&quot;init&quot;));</span>
+<span class="fc" id="L61">    }</span>
+    
+    /**
+     * ロールがADMINでは無い
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser(roles = {&quot;USER&quot;})
+    public void indexTestNotAdminRole() throws Exception {
+<span class="fc" id="L70">        mockMvc.perform(get(root))</span>
+            //.andDo(print())
+<span class="fc" id="L72">            .andExpect(status().isForbidden());</span>
+<span class="fc" id="L73">    }</span>
+    
+    /**
+     * init、正常ケース
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void initTest() throws Exception {
+<span class="fc" id="L82">        mockMvc.perform(</span>
+<span class="fc" id="L83">                post(root)</span>
+<span class="fc" id="L84">                .with(SecurityMockMvcRequestPostProcessors.csrf())</span>
+                )
+            // .andDo(print())
+<span class="fc" id="L87">            .andExpect(status().isFound())</span>
+<span class="fc" id="L88">            .andExpect(redirectedUrl(&quot;/admin/init?complete&quot;));</span>
+<span class="fc" id="L89">        verify(initService, times(1)).initData();</span>
+<span class="fc" id="L90">    }</span>
+    
+    /**
+     * init L44
+     * 初期化ユーザーでは無い
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser(username = &quot;junit-user&quot;)
+    public void initTestNotInitUser() throws Exception {
+<span class="fc" id="L100">        mockMvc.perform(</span>
+<span class="fc" id="L101">                post(root)</span>
+<span class="fc" id="L102">                .with(SecurityMockMvcRequestPostProcessors.csrf())</span>
+                )
+            //.andDo(print())
+<span class="fc" id="L105">            .andExpect(status().isOk())</span>
+<span class="fc" id="L106">            .andExpect(view().name(&quot;init&quot;))</span>
+<span class="fc" id="L107">            .andExpect(model().attribute(&quot;error&quot;, &quot;ログインユーザが初期ユーザではありません。&quot;));</span>
+<span class="fc" id="L108">        verify(initService, never()).initData();</span>
+<span class="fc" id="L109">    }</span>
+    
+    /**
+     * init L48
+     * サーバーエラー
+     * @throws Exception
+     */
+    @Test
+    @WithMockCustomUser
+    public void initTestServerError() throws Exception {
+<span class="fc" id="L119">        doThrow(new DataIntegrityViolationException(&quot;サーバーエラー&quot;))</span>
+<span class="fc" id="L120">        .when(initService).initData();</span>
+
+<span class="fc" id="L122">        mockMvc.perform(</span>
+<span class="fc" id="L123">                post(root)</span>
+<span class="fc" id="L124">                .with(SecurityMockMvcRequestPostProcessors.csrf())</span>
+                )
+            //.andDo(print())
+<span class="fc" id="L127">            .andExpect(status().isOk())</span>
+<span class="fc" id="L128">            .andExpect(view().name(&quot;init&quot;))</span>
+<span class="fc" id="L129">            .andExpect(model().attribute(&quot;error&quot;, &quot;システムエラーが発生しました。&quot;));</span>
+<span class="fc" id="L130">        verify(initService, times(1)).initData();</span>
+<span class="fc" id="L131">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span>java (2021/09/04 14:42:56)</div></body></html>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>InitService.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">java (2021/09/04 14:42:56)</a> &gt; <a href="../../index.html" class="el_group">facility_reservation</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.facilityreservation.service</a> &gt; <span class="el_source">InitService.java</span></div><h1>InitService.java</h1><pre class="source lang-java linenums">package com.example.facilityreservation.service;
+
+import java.util.Arrays;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.facilityreservation.domain.entity.FacilityEntity;
+import com.example.facilityreservation.domain.entity.FacilityTypeEntity;
+import com.example.facilityreservation.domain.entity.UserEntity;
+import com.example.facilityreservation.domain.enums.PermissionLevel;
+import com.example.facilityreservation.domain.repository.FacilityRepository;
+import com.example.facilityreservation.domain.repository.FacilityTypeRepository;
+import com.example.facilityreservation.domain.repository.ReservationRepository;
+import com.example.facilityreservation.domain.repository.UserRepository;
+
+@Service
+@Transactional(readOnly = true)
+<span class="fc" id="L20">public class InitService {</span>
+    @Autowired
+    private FacilityRepository facilityRepository;
+
+    @Autowired
+    private FacilityTypeRepository facilityTypeRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Transactional
+    public void initData() {
+        // Reservationはすべて削除
+<span class="nc" id="L36">        reservationRepository.deleteAll();</span>
+
+        // FacilityTypeは編集不可のため、何もしない
+
+        // Facilityは、IDが5以上をすべて削除
+<span class="nc" id="L41">        facilityRepository.deleteByIdGreaterThan(4);</span>
+
+        // Userは、IDが'root'と'ginza'以外をすべて削除
+<span class="nc" id="L44">        userRepository.deleteByIdNotIn(Arrays.asList(&quot;root&quot;, &quot;ginza&quot;));</span>
+
+        // 初期ユーザの復元
+<span class="nc" id="L47">        UserEntity root = new UserEntity(&quot;root&quot;, &quot;admin00&quot;, PermissionLevel.ADMIN, &quot;何でもできる&quot;);</span>
+<span class="nc" id="L48">        UserEntity ginga = new UserEntity(&quot;ginga&quot;, &quot;soft00&quot;, PermissionLevel.USER, &quot;施設情報、ユーザー情報機能は使えません。施設予約のみ可能&quot;);</span>
+<span class="nc" id="L49">        userRepository.saveAll(Arrays.asList(root, ginga));</span>
+
+        // 会議室の復元
+<span class="nc" id="L52">        FacilityEntity facility1 = setInitFacility(1, &quot;会議室001&quot;, 1, 20);</span>
+<span class="nc" id="L53">        FacilityEntity facility2 = setInitFacility(2, &quot;会議室002&quot;, 1, 40);</span>
+<span class="nc" id="L54">        FacilityEntity facility3 = setInitFacility(3, &quot;会議室003&quot;, 1, 20);</span>
+<span class="nc" id="L55">        FacilityEntity facility4 = setInitFacility(4, &quot;応接室001&quot;, 2, 10);</span>
+<span class="nc" id="L56">        facilityRepository.saveAll(Arrays.asList(</span>
+<span class="nc" id="L57">            facility1, facility2, facility3, facility4));</span>
+<span class="nc" id="L58">    }</span>
+
+    private FacilityEntity setInitFacility(Integer id, String name,
+                                           Integer typeId, Integer capacity) {
+<span class="nc" id="L62">        FacilityEntity entity = facilityRepository.findById(id).orElse(null);</span>
+
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        if (entity == null) {</span>
+<span class="nc" id="L65">            entity = new FacilityEntity();</span>
+<span class="nc" id="L66">            entity.setId(id);</span>
+        }
+
+<span class="nc" id="L69">        entity.setName(name);</span>
+<span class="nc" id="L70">        FacilityTypeEntity type = facilityTypeRepository.findById(typeId).orElse(null);</span>
+<span class="nc" id="L71">        entity.setType(type);</span>
+
+<span class="nc" id="L73">        entity.setCapacity(capacity);</span>
+
+<span class="nc" id="L75">        return entity;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span>java (2021/09/04 14:42:56)</div></body></html>

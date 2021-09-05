@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>UserInfoUpdateController.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">java (2021/09/04 14:42:56)</a> &gt; <a href="../../index.html" class="el_group">facility_reservation</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.facilityreservation.web</a> &gt; <span class="el_source">UserInfoUpdateController.java</span></div><h1>UserInfoUpdateController.java</h1><pre class="source lang-java linenums">package com.example.facilityreservation.web;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
+
+import com.example.facilityreservation.domain.entity.UserEntity;
+import com.example.facilityreservation.exception.BusinessException;
+import com.example.facilityreservation.service.UserManageService;
+import com.example.facilityreservation.web.form.UserInfoForm;
+
+@Controller
+@RequestMapping(value = &quot;/admin/user/&quot;)
+@SessionAttributes(types = UserInfoForm.class)
+<span class="fc" id="L24">public class UserInfoUpdateController {</span>
+    @SuppressWarnings(&quot;unused&quot;)
+<span class="fc" id="L26">    private final static Logger logger = LoggerFactory.getLogger(</span>
+<span class="fc" id="L27">        UserInfoUpdateController.class);</span>
+
+    @Autowired
+    private UserManageService userManageService;
+
+    @RequestMapping(path = &quot;/update/{userId}&quot;, method = RequestMethod.GET)
+    public String index(@PathVariable(value = &quot;userId&quot;) String userId,
+                        Model model) {
+<span class="fc" id="L35">        UserEntity entity = userManageService.findById(userId);</span>
+
+<span class="fc" id="L37">        UserInfoForm form = new UserInfoForm();</span>
+<span class="fc" id="L38">        form.setId(userId);</span>
+<span class="fc" id="L39">        form.setUsername(entity.getId());</span>
+<span class="fc" id="L40">        form.setPassword(entity.getPassword());</span>
+<span class="fc" id="L41">        form.setPermission(entity.getPermissionLevel()</span>
+<span class="fc" id="L42">            .ordinal());</span>
+<span class="fc" id="L43">        form.setNote(entity.getNote());</span>
+
+<span class="fc" id="L45">        model.addAttribute(&quot;userInfoForm&quot;, form);</span>
+<span class="fc" id="L46">        return &quot;user-update&quot;;</span>
+    }
+
+    public String index(UserInfoForm form, Model model) {
+<span class="fc" id="L50">        model.addAttribute(&quot;userInfoForm&quot;, form);</span>
+<span class="fc" id="L51">        return &quot;user-update&quot;;</span>
+    }
+
+    @RequestMapping(path = &quot;/update/{userId}&quot;, params = &quot;redo&quot;, method = RequestMethod.POST)
+    public String update_redo(@PathVariable(value = &quot;userId&quot;) String userId,
+                              @Validated UserInfoForm form,
+                              BindingResult result, Model model) {
+<span class="fc" id="L58">        return index(form, model);</span>
+    }
+
+    @RequestMapping(path = &quot;/update/{userId}&quot;, params = &quot;update_confirm&quot;, method = RequestMethod.POST)
+    public String update_confirm(@PathVariable(value = &quot;userId&quot;) String userId,
+                                 @Validated UserInfoForm form,
+                                 BindingResult result, Model model) {
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        if (result.hasErrors()) {</span>
+<span class="fc" id="L66">            return index(form, model);</span>
+        }
+
+        try {
+<span class="fc" id="L70">            UserEntity entity = toEntity(form);</span>
+<span class="fc" id="L71">            userManageService.saveConfirm(entity);</span>
+<span class="fc" id="L72">            return &quot;user-update-check&quot;;</span>
+<span class="fc" id="L73">        } catch (BusinessException e) {</span>
+<span class="fc" id="L74">            model.addAttribute(&quot;error&quot;, e.getLocalizedMessage());</span>
+<span class="fc" id="L75">            return index(form, model);</span>
+<span class="fc" id="L76">        } catch (Exception e) {</span>
+<span class="fc" id="L77">            model.addAttribute(&quot;error&quot;, &quot;システムエラーが発生しました。&quot;);</span>
+<span class="fc" id="L78">            return index(form, model);</span>
+        }
+    }
+
+    @RequestMapping(path = &quot;/update/{userId}&quot;, params = &quot;complete&quot;, method = RequestMethod.POST)
+    public String update(@PathVariable(value = &quot;userId&quot;) String userId,
+                         @Validated UserInfoForm form, BindingResult result,
+                         Model model) {
+<span class="fc bfc" id="L86" title="All 2 branches covered.">        if (result.hasErrors()) {</span>
+<span class="fc" id="L87">            return index(form, model);</span>
+        }
+
+        try {
+<span class="fc" id="L91">            UserEntity entity = toEntity(form);</span>
+<span class="fc" id="L92">            userManageService.save(entity);</span>
+<span class="fc" id="L93">            return &quot;redirect:/admin/user/update/&quot; + userId + &quot;?complete&quot;;</span>
+<span class="fc" id="L94">        } catch (BusinessException e) {</span>
+<span class="fc" id="L95">            model.addAttribute(&quot;error&quot;, e.getLocalizedMessage());</span>
+<span class="fc" id="L96">            return index(form, model);</span>
+<span class="fc" id="L97">        } catch (Exception e) {</span>
+<span class="fc" id="L98">            model.addAttribute(&quot;error&quot;, &quot;システムエラーが発生しました。&quot;);</span>
+<span class="fc" id="L99">            return index(form, model);</span>
+        }
+    }
+
+    @RequestMapping(path = &quot;/update/{userId}&quot;, params = &quot;complete&quot;, method = RequestMethod.GET)
+    public String update_completion(Model model, SessionStatus sessionStatus) {
+<span class="fc" id="L105">        sessionStatus.setComplete();</span>
+<span class="fc" id="L106">        model.addAttribute(&quot;message&quot;, &quot;ユーザ情報の更新&quot;);</span>
+<span class="fc" id="L107">        return &quot;common-completion&quot;;</span>
+    }
+
+    @RequestMapping(path = &quot;/delete/{userId}&quot;, params = &quot;redo&quot;, method = RequestMethod.POST)
+    public String delete_redo(@PathVariable(value = &quot;userId&quot;) String userId,
+                              @Validated UserInfoForm form,
+                              BindingResult result, Model model) {
+<span class="fc" id="L114">        return index(form, model);</span>
+    }
+
+    @RequestMapping(path = &quot;/update/{userId}&quot;, params = &quot;delete_confirm&quot;, method = RequestMethod.POST)
+    public String delete_confirm(@PathVariable(value = &quot;userId&quot;) String userId,
+                                 @Validated UserInfoForm form,
+                                 BindingResult result, Model model) {
+
+        try {
+<span class="fc" id="L123">            userManageService.deleteConfirm(userId);</span>
+<span class="fc" id="L124">            UserEntity entity = userManageService.findById(userId);</span>
+<span class="fc" id="L125">            form.setId(userId);</span>
+<span class="fc" id="L126">            form.setUsername(entity.getId());</span>
+<span class="fc" id="L127">            form.setPassword(entity.getPassword());</span>
+<span class="fc" id="L128">            form.setPermission(entity.getPermissionLevel()</span>
+<span class="fc" id="L129">                .ordinal());</span>
+<span class="fc" id="L130">            form.setNote(entity.getNote());</span>
+
+<span class="fc" id="L132">            model.addAttribute(&quot;userInfoForm&quot;, form);</span>
+<span class="fc" id="L133">            return &quot;user-delete-check&quot;;</span>
+<span class="fc" id="L134">        } catch (BusinessException e) {</span>
+<span class="fc" id="L135">            model.addAttribute(&quot;error&quot;, e.getLocalizedMessage());</span>
+<span class="fc" id="L136">            return index(form, model);</span>
+<span class="fc" id="L137">        } catch (Exception e) {</span>
+<span class="fc" id="L138">            model.addAttribute(&quot;error&quot;, &quot;システムエラーが発生しました。&quot;);</span>
+<span class="fc" id="L139">            return index(form, model);</span>
+        }
+    }
+
+    @RequestMapping(path = &quot;/delete/{userId}&quot;, params = &quot;complete&quot;, method = RequestMethod.POST)
+    public String delete(@PathVariable(value = &quot;userId&quot;) String userId,
+                         @Validated UserInfoForm form, BindingResult result,
+                         Model model) {
+
+        try {
+<span class="fc" id="L149">            userManageService.deleteById(userId);</span>
+<span class="fc" id="L150">            return &quot;redirect:/admin/user/delete/&quot; + userId + &quot;?complete&quot;;</span>
+<span class="fc" id="L151">        } catch (BusinessException e) {</span>
+<span class="fc" id="L152">            model.addAttribute(&quot;error&quot;, e.getLocalizedMessage());</span>
+<span class="fc" id="L153">            return index(form, model);</span>
+<span class="fc" id="L154">        } catch (Exception e) {</span>
+<span class="fc" id="L155">            model.addAttribute(&quot;error&quot;, &quot;システムエラーが発生しました。&quot;);</span>
+<span class="fc" id="L156">            return index(form, model);</span>
+        }
+    }
+
+    @RequestMapping(path = &quot;/delete/{userId}&quot;, params = &quot;complete&quot;, method = RequestMethod.GET)
+    public String delete_completion(Model model, SessionStatus sessionStatus) {
+<span class="fc" id="L162">        sessionStatus.setComplete();</span>
+<span class="fc" id="L163">        model.addAttribute(&quot;message&quot;, &quot;ユーザ情報の削除&quot;);</span>
+<span class="fc" id="L164">        return &quot;common-completion&quot;;</span>
+    }
+
+    private UserEntity toEntity(UserInfoForm form) {
+<span class="fc" id="L168">        UserEntity entity = new UserEntity();</span>
+<span class="fc" id="L169">        entity.setId(form.getUsername());</span>
+<span class="fc" id="L170">        entity.setPassword(form.getPassword());</span>
+<span class="fc" id="L171">        entity.setPermissionLevel(form.getPermission());</span>
+<span class="fc" id="L172">        entity.setNote(form.getNote());</span>
+<span class="fc" id="L173">        return entity;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span>java (2021/09/04 14:42:56)</div></body></html>

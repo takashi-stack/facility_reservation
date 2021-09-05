@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>FacilityUpdateController.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">java (2021/09/04 14:42:56)</a> &gt; <a href="../../index.html" class="el_group">facility_reservation</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.facilityreservation.web</a> &gt; <span class="el_source">FacilityUpdateController.java</span></div><h1>FacilityUpdateController.java</h1><pre class="source lang-java linenums">package com.example.facilityreservation.web;
+
+import java.security.Principal;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
+
+import com.example.facilityreservation.domain.entity.FacilityEntity;
+import com.example.facilityreservation.domain.entity.FacilityTypeEntity;
+import com.example.facilityreservation.exception.BusinessException;
+import com.example.facilityreservation.service.FacilityService;
+import com.example.facilityreservation.service.FacilityTypeService;
+import com.example.facilityreservation.web.form.FacilityForm;
+
+@Controller
+@RequestMapping(value = &quot;/admin/facility/&quot;)
+@SessionAttributes(types = FacilityForm.class)
+<span class="fc" id="L28">public class FacilityUpdateController extends BaseController {</span>
+    @Autowired
+    private FacilityService facilityService;
+
+    @Autowired
+    private FacilityTypeService facilityTypeService;
+
+    @ModelAttribute(&quot;types&quot;)
+    public List&lt;FacilityTypeEntity&gt; getTypes() {
+<span class="fc" id="L37">        return facilityTypeService.list();</span>
+    }
+
+    @RequestMapping(value = &quot;/update/{facilityId}&quot;, method = RequestMethod.GET)
+    public String index(@PathVariable(value = &quot;facilityId&quot;) Integer facilityId,
+                        Model model) {
+<span class="fc" id="L43">        FacilityEntity entity = facilityService.findById(facilityId);</span>
+
+<span class="fc" id="L45">        FacilityForm form = new FacilityForm();</span>
+<span class="fc" id="L46">        form.setId(entity.getId());</span>
+<span class="fc" id="L47">        form.setName(entity.getName());</span>
+<span class="fc" id="L48">        form.setTypeId(entity.getType().getId());</span>
+<span class="fc" id="L49">        form.setCapacity(entity.getCapacity());</span>
+
+<span class="fc" id="L51">        model.addAttribute(&quot;facilityForm&quot;, form);</span>
+<span class="fc" id="L52">        return &quot;facility-update&quot;;</span>
+    }
+
+    public String index(FacilityForm form, Model model) {
+<span class="fc" id="L56">        model.addAttribute(&quot;facilityForm&quot;, form);</span>
+<span class="fc" id="L57">        return &quot;facility-update&quot;;</span>
+    }
+
+    @RequestMapping(value = &quot;/update/{facilityId}&quot;, params = &quot;redo&quot;, method = RequestMethod.POST)
+    public String update_redo(@PathVariable(value = &quot;facilityId&quot;) Integer facilityId,
+                              @Validated FacilityForm form,
+                              BindingResult result, Model model) {
+<span class="fc" id="L64">        return index(form, model);</span>
+    }
+
+    @RequestMapping(value = &quot;/update/{facilityId}&quot;, params = &quot;update_confirm&quot;, method = RequestMethod.POST)
+    public String update_confirm(@PathVariable(value = &quot;facilityId&quot;) Integer facilityId,
+                                 @Validated FacilityForm form,
+                                 BindingResult result, Principal principal,
+                                 Model model) {
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        if (result.hasErrors()) {</span>
+<span class="fc" id="L73">            return index(form, model);</span>
+        }
+
+        try {
+<span class="fc" id="L77">            facilityService.updateConfirm(facilityId);</span>
+<span class="fc" id="L78">            return &quot;facility-update-check&quot;;</span>
+<span class="fc" id="L79">        } catch (BusinessException e) {</span>
+<span class="fc" id="L80">            model.addAttribute(&quot;error&quot;, e.getMessage());</span>
+<span class="fc" id="L81">            return index(form, model);</span>
+<span class="fc" id="L82">        } catch (Exception e) {</span>
+<span class="fc" id="L83">            model.addAttribute(&quot;error&quot;, &quot;システムエラーが発生しました。&quot;);</span>
+<span class="fc" id="L84">            return index(form, model);</span>
+        }
+    }
+
+    @RequestMapping(value = &quot;/update/{facilityId}&quot;, params = &quot;complete&quot;, method = RequestMethod.POST)
+    public String update(@PathVariable(value = &quot;facilityId&quot;) Integer facilityId,
+                         Principal principal, @Validated FacilityForm form,
+                         BindingResult result, Model model) {
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        if (result.hasErrors()) {</span>
+<span class="fc" id="L93">            return index(form, model);</span>
+        }
+
+        try {
+<span class="fc" id="L97">            facilityService.update(form, getLoginUser(principal), facilityId);</span>
+<span class="fc" id="L98">            return &quot;redirect:/admin/facility/update/?complete&quot;;</span>
+<span class="fc" id="L99">        } catch (BusinessException e) {</span>
+<span class="fc" id="L100">            model.addAttribute(&quot;error&quot;, e.getMessage());</span>
+<span class="fc" id="L101">            return index(form, model);</span>
+<span class="fc" id="L102">        } catch (Exception e) {</span>
+<span class="fc" id="L103">            model.addAttribute(&quot;error&quot;, &quot;システムエラーが発生しました。&quot;);</span>
+<span class="fc" id="L104">            return index(form, model);</span>
+        }
+    }
+
+    @RequestMapping(value = &quot;/update&quot;, params = &quot;complete&quot;, method = RequestMethod.GET)
+    public String update_completion(Model model, SessionStatus sessionStatus) {
+<span class="fc" id="L110">        sessionStatus.setComplete();</span>
+<span class="fc" id="L111">        model.addAttribute(&quot;message&quot;, &quot;施設情報の更新&quot;);</span>
+<span class="fc" id="L112">        return &quot;common-completion&quot;;</span>
+    }
+
+    @RequestMapping(value = &quot;/delete/{facilityId}&quot;, params = &quot;redo&quot;, method = RequestMethod.POST)
+    public String delete_redo(@PathVariable(value = &quot;facilityId&quot;) Integer facilityId,
+                              @Validated FacilityForm form,
+                              BindingResult result, Model model) {
+<span class="nc" id="L119">        return index(form, model);</span>
+    }
+
+    @RequestMapping(value = &quot;/update/{facilityId}&quot;, params = &quot;delete_confirm&quot;, method = RequestMethod.POST)
+    public String delete_confirm(@PathVariable(value = &quot;facilityId&quot;) Integer facilityId,
+                                 @Validated FacilityForm form,
+                                 BindingResult result, Principal principal,
+                                 Model model) {
+<span class="nc bnc" id="L127" title="All 2 branches missed.">        if (result.hasErrors()) {</span>
+<span class="nc" id="L128">            return index(form, model);</span>
+        }
+
+        try {
+<span class="nc" id="L132">            facilityService.deleteConfirm(facilityId);</span>
+<span class="nc" id="L133">            FacilityEntity entity = facilityService.findById(facilityId);</span>
+<span class="nc" id="L134">            form.setId(entity.getId());</span>
+<span class="nc" id="L135">            form.setName(entity.getName());</span>
+<span class="nc" id="L136">            form.setTypeId(entity.getType().getId());</span>
+<span class="nc" id="L137">            form.setCapacity(entity.getCapacity());</span>
+
+<span class="nc" id="L139">            return &quot;facility-delete-check&quot;;</span>
+<span class="nc" id="L140">        } catch (BusinessException e) {</span>
+<span class="nc" id="L141">            model.addAttribute(&quot;error&quot;, e.getMessage());</span>
+<span class="nc" id="L142">            return index(form, model);</span>
+<span class="nc" id="L143">        } catch (Exception e) {</span>
+<span class="nc" id="L144">            model.addAttribute(&quot;error&quot;, &quot;システムエラーが発生しました。&quot;);</span>
+<span class="nc" id="L145">            return index(form, model);</span>
+        }
+    }
+
+    @RequestMapping(value = &quot;/delete/{facilityId}&quot;, params = &quot;complete&quot;, method = RequestMethod.POST)
+    public String delete(@PathVariable(value = &quot;facilityId&quot;) Integer facilityId,
+                         @Validated FacilityForm form, BindingResult result,
+                         Principal principal, Model model) {
+<span class="fc bfc" id="L153" title="All 2 branches covered.">        if (result.hasErrors()) {</span>
+<span class="fc" id="L154">            return index(form, model);</span>
+        }
+
+        try {
+<span class="fc" id="L158">            facilityService.deleteById(facilityId);</span>
+<span class="fc" id="L159">            return &quot;redirect:/admin/facility/delete/?complete&quot;;</span>
+<span class="fc" id="L160">        } catch (BusinessException e) {</span>
+<span class="fc" id="L161">            model.addAttribute(&quot;error&quot;, e.getMessage());</span>
+<span class="fc" id="L162">            return index(form, model);</span>
+<span class="fc" id="L163">        } catch (Exception e) {</span>
+<span class="fc" id="L164">            model.addAttribute(&quot;error&quot;, &quot;システムエラーが発生しました。&quot;);</span>
+<span class="fc" id="L165">            return index(form, model);</span>
+        }
+    }
+
+    @RequestMapping(value = &quot;/delete&quot;, params = &quot;complete&quot;, method = RequestMethod.GET)
+    public String delete_completion(Model model, SessionStatus sessionStatus) {
+<span class="fc" id="L171">        sessionStatus.setComplete();</span>
+<span class="fc" id="L172">        model.addAttribute(&quot;message&quot;, &quot;施設情報の削除&quot;);</span>
+<span class="fc" id="L173">        return &quot;common-completion&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span>java (2021/09/04 14:42:56)</div></body></html>
